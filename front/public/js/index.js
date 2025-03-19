@@ -185,73 +185,72 @@ function updateStatus() {
     }
     $status.text(status);
     $pgn.html(game.pgn());
+}
 
-    // Initialize game when page loads
- $(document).ready(function() {
+// Initialize game when page loads
+$(document).ready(function() {
     initGame();
- });
+});
 
- // Chat functionality
+// Chat functionality
 
- function sendMessage() {
+function sendMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
 
     if (message) {
-        socket.emit('chatMessage', {
-            message: message,
-            username: playerUsername
-        });
+        socket.emit('chat', message);
         input.value = '';
     }
- }
- // Handle enter key in chat input
+}
 
- document.getElementById('chatInput').addEventListener('keypress', function(e) {
+// Handle enter key in chat input
+
+document.getElementById('chatInput').addEventListener('keypress', function(e) {
     if (e.key ==='Enter') {
         sendMessage();
     }
- });
+});
 
- // Handle chat messages
+// Handle chat messages
 
- socket.on('chatMessage', function(data) {
+socket.on('chat', function(data) {
     const chatMessages = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    messageDiv.textContent = `${data.username}: ${data.message}`;
-    chatMessages.appendChild(messageDiv);
+    const messageElement = document.createElement('div');
+    messageElement.className = 'chat-message';
+    messageElement.textContent = `${data.username}: ${data.message}`;
+    chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
- });
-    
- // timer functionality
+});
 
- function formatTime(seconds) {
+// timer functionality
+
+function formatTime(seconds) {
     const minutes = Math.floor(seconds/60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
- }
+}
 
- //Update timers
- socket.on('updateTimers', function(data){
+//Update timers
+socket.on('updateTimers', function(data){
     document.getElementById('whiteTimer').textContent =formatTime(data.whiteTime);
     document.getElementById('blackTimer').textContent =formatTime(data.blackTime);
 
- });
+});
 
- // Ready button handler
+// Ready button handler
 
- document.getElementById('readyButton').addEventListener('click', function(){
+document.getElementById('readyButton').addEventListener('click', function(){
     socket.emit('playerReady');
     this.disabled =true;
     this.textContent ='waiting for opponent...';
- });
+});
 
- // Join game room if code is provided in URL
+// Join game room if code is provided in URL
 
- var urlParams = new URLSearchParams(window.location.search);
- if (urlParams.get('code')) {
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('code')) {
     socket.emit('joinGame', {
         code: urlParams.get('code')
     });
- }
 }
